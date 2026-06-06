@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "==> ContextScope Demo Mode"
+echo ""
+echo "Demo Mode replays prerecorded sessions — no API key required."
+echo ""
+echo "To run Demo Mode:"
+echo "  1. Open the app: open App/ContextScopeApp/ContextScopeApp.xcworkspace"
+echo "  2. Build and run the ContextScopeApp scheme in Xcode."
+echo "  3. Click 'Play Demo' on the welcome screen."
+echo "  4. Select a scenario:"
+echo "       * Healthy Request    — moderate context, one tool call, low pressure"
+echo "       * Bloated Context    — oversized tools, duplicate history, >85% pressure"
+echo "       * Runaway Tool Loop  — repeated tool calls, growing results, final failure"
+echo ""
+echo "Alternatively, load a fixture directly:"
+echo "  swift run --package-path Packages/ContextScopeDemoData"
+echo ""
+echo "Sample trace fixtures are in:"
+echo "  Packages/ContextScopeDemoData/Sources/ContextScopeDemoData/Fixtures/"
+echo "  Examples/sample-traces/"
