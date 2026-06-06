@@ -1,0 +1,17 @@
+{
+  "version": "0.1",
+  "scenario": "bloated_context",
+  "frames": [
+    {
+      "timestamp": "2024-01-01T00:00:00Z",
+      "totalTokens": 109000,
+      "contextLimit": 128000,
+      "items": [
+        {"category": "system_prompt", "tokenCount": 512, "estimatedTokenCount": false, "content": "[demo system prompt]"},
+        {"category": "conversation_history", "tokenCount": 45000, "estimatedTokenCount": false, "content": "[demo history with duplicates]"},
+        {"category": "tool_definitions", "tokenCount": 52000, "estimatedTokenCount": false, "content": "[bloated tool definitions]"},
+        {"category": "retrieved_context", "tokenCount": 11488, "estimatedTokenCount": false, "content": "[retrieved docs]"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "version": "0.1",
+  "scenario": "healthy_request",
+  "frames": [
+    {
+      "timestamp": "2024-01-01T00:00:00Z",
+      "totalTokens": 512,
+      "contextLimit": 128000,
+      "items": [
+        {"category": "system_prompt", "tokenCount": 128, "estimatedTokenCount": false, "content": "[demo system prompt]"},
+        {"category": "conversation_history", "tokenCount": 256, "estimatedTokenCount": false, "content": "[demo history]"},
+        {"category": "tool_definitions", "tokenCount": 128, "estimatedTokenCount": false, "content": "[demo tools]"}
+      ]
+    }
+  ]
+}

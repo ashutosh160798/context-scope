@@ -1,0 +1,24 @@
+{
+  "version": "0.1",
+  "scenario": "runaway_tool_loop",
+  "frames": [
+    {
+      "timestamp": "2024-01-01T00:00:00Z",
+      "totalTokens": 2048,
+      "contextLimit": 128000,
+      "items": [
+        {"category": "system_prompt", "tokenCount": 256, "estimatedTokenCount": false, "content": "[demo system prompt]"},
+        {"category": "tool_outputs", "tokenCount": 1792, "estimatedTokenCount": false, "content": "[first tool result]"}
+      ]
+    },
+    {
+      "timestamp": "2024-01-01T00:00:05Z",
+      "totalTokens": 8192,
+      "contextLimit": 128000,
+      "items": [
+        {"category": "system_prompt", "tokenCount": 256, "estimatedTokenCount": false, "content": "[demo system prompt]"},
+        {"category": "tool_outputs", "tokenCount": 7936, "estimatedTokenCount": false, "content": "[accumulated tool results]"}
+      ]
+    }
+  ]
+}
