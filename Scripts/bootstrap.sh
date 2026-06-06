@@ -18,7 +18,7 @@ echo "macOS: $MACOS_VERSION"
 echo ""
 echo "==> Resolving Swift Package Manager dependencies"
 
-for pkg in ContextScopeCore ContextScopeCapture ContextScopeStorage ContextScopeDemoData; do
+for pkg in ContextScopeCore ContextScopeCapture ContextScopeStorage ContextScopeDemoData ContextScopeVisualization; do
   echo "  Resolving Packages/$pkg..."
   swift package resolve --package-path "Packages/$pkg" 2>&1 | tail -1
 done
@@ -26,7 +26,7 @@ done
 echo ""
 echo "==> Building packages"
 
-for pkg in ContextScopeCore ContextScopeCapture ContextScopeStorage ContextScopeDemoData; do
+for pkg in ContextScopeCore ContextScopeCapture ContextScopeStorage ContextScopeDemoData ContextScopeVisualization; do
   echo "  Building Packages/$pkg..."
   swift build --package-path "Packages/$pkg" -q
 done

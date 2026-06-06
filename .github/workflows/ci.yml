@@ -40,3 +40,6 @@ jobs:
 
       - name: Test ContextScopeDemoData
         run: swift test --package-path Packages/ContextScopeDemoData
+
+      - name: Build ContextScopeVisualization
+        run: swift build --package-path Packages/ContextScopeVisualization

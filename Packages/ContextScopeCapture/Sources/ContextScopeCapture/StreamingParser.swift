@@ -4,11 +4,11 @@ import ContextScopeCore
 public struct StreamingParser: Sendable {
     public init() {}
 
-    public func parse(
-        sseLines: some AsyncSequence,
+    public func parse<S: AsyncSequence>(
+        sseLines: S,
         context: StreamingContext,
         adapter: any ProviderAdapter
-    ) -> AsyncStream<TraceEvent> {
+    ) -> AsyncStream<TraceEvent> where S.Element == String {
         fatalError("unimplemented")
     }
 }

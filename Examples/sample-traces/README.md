@@ -17,8 +17,4 @@ Or create one manually following [`Docs/TraceFormat.md`](../../Docs/TraceFormat.
 
 ## Validating a trace
 
-```bash
-./Scripts/validate-traces.sh path/to/trace.contextscope.json
-```
-
-(Script coming in a starter issue — see `Docs/StarterIssues.md`.)
+> `Scripts/validate-traces.sh` is not yet implemented. It is tracked as a starter issue in [`Docs/StarterIssues.md`](../../Docs/StarterIssues.md).

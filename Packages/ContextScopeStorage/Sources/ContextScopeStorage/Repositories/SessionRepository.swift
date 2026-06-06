@@ -1,7 +1,7 @@
 import Foundation
 import ContextScopeCore
 
-public actor SessionRepository {
+public actor SessionRepository: SessionStoring {
     private let database: Database
 
     public init(database: Database) {
@@ -12,11 +12,11 @@ public actor SessionRepository {
         fatalError("unimplemented")
     }
 
-    public func fetch(for projectID: UUID) async throws -> [Session] {
+    public func fetchSessions(for projectID: UUID) async throws -> [Session] {
         fatalError("unimplemented")
     }
 
-    public func delete(id: UUID) async throws {
+    public func deleteSession(id: UUID) async throws {
         fatalError("unimplemented")
     }
 }

@@ -2,7 +2,7 @@ import Foundation
 
 // Redacts secrets from headers before any logging, storage, or export.
 public struct Sanitizer: Sendable {
-    static let secretHeaderNames: Set<String> = [
+    public static let secretHeaderNames: Set<String> = [
         "authorization",
         "x-api-key",
         "api-key",
