@@ -112,7 +112,7 @@ public struct OpenAIAdapter: ProviderAdapter {
     }
 }
 
-public enum AdapterError: Error, LocalizedError {
+public enum AdapterError: Error, LocalizedError, Equatable {
     case missingBody
     case unsupportedFormat
 

@@ -30,6 +30,12 @@ struct ContextScopeApp: App {
                 }
             }
         }
+
+        MenuBarExtra("ContextScope", systemImage: appState.proxyRunning ? "waveform.path.ecg.rectangle.fill" : "waveform.path.ecg.rectangle") {
+            MenuBarView()
+                .environmentObject(appState)
+        }
+        .menuBarExtraStyle(.window)
     }
 }
 

@@ -13,7 +13,7 @@ public actor ProxyServer {
     private let interceptor: RequestInterceptor
     private let sanitizer: Sanitizer
     private let eventContinuation: AsyncStream<TraceEvent>.Continuation
-    public let events: AsyncStream<TraceEvent>
+    public nonisolated let events: AsyncStream<TraceEvent>
 
     public init(port: UInt16 = 4319, upstreamBaseURL: URL, apiKey: String) {
         self.port = port
@@ -61,14 +61,16 @@ public actor ProxyServer {
         }
 
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            l.stateUpdateHandler = { state in
+            // Clear the handler immediately after the first meaningful state to
+            // prevent double-resume when stop() causes a subsequent .cancelled.
+            l.stateUpdateHandler = { [weak l] state in
                 switch state {
                 case .ready:
+                    l?.stateUpdateHandler = { _ in }
                     continuation.resume()
                 case .failed(let error):
+                    l?.stateUpdateHandler = { _ in }
                     continuation.resume(throwing: error)
-                case .cancelled:
-                    continuation.resume(throwing: ProxyError.cancelled)
                 default:
                     break
                 }

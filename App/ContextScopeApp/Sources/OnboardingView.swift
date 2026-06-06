@@ -9,6 +9,7 @@ struct OnboardingView: View {
     @State private var upstreamURL = "https://api.openai.com"
     @State private var apiKey = ""
     @State private var showAPIKey = false
+    private let keychain = KeychainStore()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -162,14 +163,21 @@ const client = new OpenAI({
             .tabViewStyle(.automatic)
         }
         .frame(minWidth: 640, minHeight: 540)
+        .onAppear {
+            if let saved = UserDefaults.standard.string(forKey: "upstreamBaseURL"), !saved.isEmpty {
+                upstreamURL = saved
+            }
+            if let saved = keychain.read(), !saved.isEmpty {
+                apiKey = saved
+            }
+        }
     }
 
     private func saveSettings() {
         UserDefaults.standard.set(upstreamURL, forKey: "upstreamBaseURL")
-        // NOTE: In production, apiKey should be stored in Keychain.
-        // For this prototype it's stored in UserDefaults with a clear privacy warning.
-        // TODO: replace with SecItemAdd/CopyMatching Keychain calls.
-        UserDefaults.standard.set(apiKey, forKey: "apiKey")
+        if !apiKey.isEmpty {
+            keychain.write(apiKey)
+        }
     }
 }
 

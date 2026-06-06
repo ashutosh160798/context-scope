@@ -8,7 +8,11 @@ struct ContextRiverView: View {
     @State private var hoveredLaneID: ContextCategory?
     @AccessibilityFocusState private var focused: Bool
 
-    private var snapshot: ContextSnapshot? { appState.replayEngine.currentSnapshot }
+    // Prefer live capture data when proxy is running; fall back to replay engine
+    private var snapshot: ContextSnapshot? {
+        if appState.proxyRunning, let live = appState.liveSnapshot { return live }
+        return appState.replayEngine.currentSnapshot
+    }
 
     var body: some View {
         ScrollView {
@@ -36,6 +40,9 @@ struct ContextRiverView: View {
             .animation(.easeInOut(duration: 0.4), value: animatedLanes.map(\.tokenCount))
         }
         .onChange(of: appState.replayEngine.currentFrameIndex) { _, _ in
+            updateLanes()
+        }
+        .onChange(of: appState.liveTokenCount) { _, _ in
             updateLanes()
         }
         .onAppear { updateLanes() }

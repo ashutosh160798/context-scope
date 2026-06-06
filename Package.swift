@@ -26,5 +26,10 @@ let package = Package(
             ],
             path: "App/ContextScopeApp/Sources"
         ),
+        .testTarget(
+            name: "ContextScopeAppTests",
+            dependencies: ["ContextScopeApp"],
+            path: "App/ContextScopeApp/Tests/ContextScopeAppTests"
+        ),
     ]
 )

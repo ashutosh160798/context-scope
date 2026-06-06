@@ -15,31 +15,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_15.4.app
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
 
-      - name: Build ContextScopeCore
-        run: swift build --package-path Packages/ContextScopeCore
+      - name: Build
+        run: swift build
 
-      - name: Test ContextScopeCore
-        run: swift test --package-path Packages/ContextScopeCore
+      - name: Test
+        run: swift test
 
-      - name: Build ContextScopeCapture
-        run: swift build --package-path Packages/ContextScopeCapture
-
-      - name: Test ContextScopeCapture
-        run: swift test --package-path Packages/ContextScopeCapture
-
-      - name: Build ContextScopeStorage
-        run: swift build --package-path Packages/ContextScopeStorage
-
-      - name: Test ContextScopeStorage
-        run: swift test --package-path Packages/ContextScopeStorage
-
-      - name: Build ContextScopeDemoData
-        run: swift build --package-path Packages/ContextScopeDemoData
-
-      - name: Test ContextScopeDemoData
-        run: swift test --package-path Packages/ContextScopeDemoData
-
-      - name: Build ContextScopeVisualization
-        run: swift build --package-path Packages/ContextScopeVisualization
+      - name: Ad-hoc sign binary
+        run: bash Scripts/sign.sh

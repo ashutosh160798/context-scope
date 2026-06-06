@@ -16,6 +16,10 @@ let package = Package(
             dependencies: ["ContextScopeCore"],
             path: "Sources/ContextScopeVisualization"
         ),
-        // No test target: SwiftUI views require a running display and are tested manually
+        .testTarget(
+            name: "ContextScopeVisualizationTests",
+            dependencies: ["ContextScopeVisualization"],
+            path: "Tests/ContextScopeVisualizationTests"
+        ),
     ]
 )

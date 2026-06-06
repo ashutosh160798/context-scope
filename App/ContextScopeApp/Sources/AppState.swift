@@ -23,6 +23,11 @@ final class AppState: ObservableObject {
     @Published var proxyError: String?
     var proxyBaseURL: String { "http://127.0.0.1:4319/v1" }
 
+    // MARK: - Live capture
+    @Published var liveSnapshot: ContextSnapshot?
+    @Published var liveTokenCount: Int = 0
+    private var captureCoordinator: LiveCaptureCoordinator?
+
     // MARK: - Real sessions (live proxy captures)
     @Published var liveSessions: [Session] = []
     @Published var selectedSession: Session?
@@ -31,10 +36,20 @@ final class AppState: ObservableObject {
     let demoScenarios: [DemoScenario] = DemoScenarioRegistry.all
 
     private var proxy: ProxyServer?
+    private let keychain = KeychainStore()
 
     init() {
-        // Show onboarding on first launch
         showOnboarding = !UserDefaults.standard.bool(forKey: "hasLaunchedBefore")
+        migrateAPIKeyIfNeeded()
+    }
+
+    // One-time migration: move plaintext API key from UserDefaults into Keychain
+    private func migrateAPIKeyIfNeeded() {
+        let ud = UserDefaults.standard
+        if let legacy = ud.string(forKey: "apiKey"), !legacy.isEmpty {
+            keychain.write(legacy)
+            ud.removeObject(forKey: "apiKey")
+        }
     }
 
     // MARK: - Demo
@@ -71,13 +86,29 @@ final class AppState: ObservableObject {
     func startProxy() async {
         guard !proxyRunning else { return }
         let upstreamURL = URL(string: UserDefaults.standard.string(forKey: "upstreamBaseURL") ?? "https://api.openai.com")!
-        let apiKey = UserDefaults.standard.string(forKey: "apiKey") ?? ""
+        let apiKey = keychain.read() ?? ""
         let server = ProxyServer(port: 4319, upstreamBaseURL: upstreamURL, apiKey: apiKey)
         proxy = server
         do {
             try await server.start()
             proxyRunning = true
             proxyError = nil
+            let coordinator = LiveCaptureCoordinator()
+            captureCoordinator = coordinator
+            coordinator.start(events: server.events)
+            // Forward coordinator's published values to AppState
+            Task { [weak self, weak coordinator] in
+                guard let self, let coordinator else { return }
+                for await snap in coordinator.$liveSnapshot.values {
+                    self.liveSnapshot = snap
+                }
+            }
+            Task { [weak self, weak coordinator] in
+                guard let self, let coordinator else { return }
+                for await count in coordinator.$liveTokenCount.values {
+                    self.liveTokenCount = count
+                }
+            }
         } catch {
             proxyError = error.localizedDescription
             proxyRunning = false
@@ -85,6 +116,10 @@ final class AppState: ObservableObject {
     }
 
     func stopProxy() async {
+        captureCoordinator?.stop()
+        captureCoordinator = nil
+        liveSnapshot = nil
+        liveTokenCount = 0
         await proxy?.stop()
         proxy = nil
         proxyRunning = false
