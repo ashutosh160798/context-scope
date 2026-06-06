@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: macos-14
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app
+
+      - name: Build ContextScopeCore
+        run: swift build --package-path Packages/ContextScopeCore
+
+      - name: Test ContextScopeCore
+        run: swift test --package-path Packages/ContextScopeCore
+
+      - name: Build ContextScopeCapture
+        run: swift build --package-path Packages/ContextScopeCapture
+
+      - name: Test ContextScopeCapture
+        run: swift test --package-path Packages/ContextScopeCapture
+
+      - name: Build ContextScopeStorage
+        run: swift build --package-path Packages/ContextScopeStorage
+
+      - name: Test ContextScopeStorage
+        run: swift test --package-path Packages/ContextScopeStorage
+
+      - name: Build ContextScopeDemoData
+        run: swift build --package-path Packages/ContextScopeDemoData
+
+      - name: Test ContextScopeDemoData
+        run: swift test --package-path Packages/ContextScopeDemoData
