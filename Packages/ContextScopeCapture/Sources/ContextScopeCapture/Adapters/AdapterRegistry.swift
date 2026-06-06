@@ -3,8 +3,12 @@ import ContextScopeCore
 public struct AdapterRegistry: Sendable {
     private let adapters: [any ProviderAdapter]
 
-    public init(adapters: [any ProviderAdapter] = []) {
+    public init(adapters: [any ProviderAdapter]) {
         self.adapters = adapters
+    }
+
+    public static func openAI() -> AdapterRegistry {
+        AdapterRegistry(adapters: [OpenAIAdapter()])
     }
 
     public func adapter(for request: HTTPRequest) -> (any ProviderAdapter)? {

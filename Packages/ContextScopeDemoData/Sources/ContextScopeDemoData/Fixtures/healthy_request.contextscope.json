@@ -1,15 +1,103 @@
 {
   "version": "0.1",
   "scenario": "healthy_request",
+  "model": "gpt-4o",
+  "contextLimit": 128000,
   "frames": [
     {
-      "timestamp": "2024-01-01T00:00:00Z",
-      "totalTokens": 512,
-      "contextLimit": 128000,
+      "timestamp": "2024-01-01T10:00:00Z",
+      "totalTokens": 148,
       "items": [
-        {"category": "system_prompt", "tokenCount": 128, "estimatedTokenCount": false, "content": "[demo system prompt]"},
-        {"category": "conversation_history", "tokenCount": 256, "estimatedTokenCount": false, "content": "[demo history]"},
-        {"category": "tool_definitions", "tokenCount": 128, "estimatedTokenCount": false, "content": "[demo tools]"}
+        {
+          "category": "system_prompt",
+          "tokenCount": 148,
+          "estimatedTokenCount": false,
+          "content": "You are a helpful coding assistant. Answer concisely and accurately. If you are unsure, say so. Format code examples with markdown code blocks."
+        }
+      ]
+    },
+    {
+      "timestamp": "2024-01-01T10:00:01Z",
+      "totalTokens": 558,
+      "items": [
+        {
+          "category": "system_prompt",
+          "tokenCount": 148,
+          "estimatedTokenCount": false,
+          "content": "You are a helpful coding assistant. Answer concisely and accurately. If you are unsure, say so. Format code examples with markdown code blocks."
+        },
+        {
+          "category": "conversation_history",
+          "tokenCount": 281,
+          "estimatedTokenCount": false,
+          "content": "[User] How do I read a file in Python?\n[Assistant] Use the built-in `open()` function:\n```python\nwith open('file.txt', 'r') as f:\n    content = f.read()\n```\nThis automatically closes the file when the block exits.\n[User] What about reading line by line?\n[Assistant] Iterate over the file object:\n```python\nwith open('file.txt', 'r') as f:\n    for line in f:\n        print(line.strip())\n```"
+        },
+        {
+          "category": "conversation_history",
+          "tokenCount": 129,
+          "estimatedTokenCount": false,
+          "content": "[User] Can you help me write a function that reads a CSV and sums a numeric column?"
+        }
+      ]
+    },
+    {
+      "timestamp": "2024-01-01T10:00:02Z",
+      "totalTokens": 894,
+      "items": [
+        {
+          "category": "system_prompt",
+          "tokenCount": 148,
+          "estimatedTokenCount": false,
+          "content": "You are a helpful coding assistant. Answer concisely and accurately. If you are unsure, say so. Format code examples with markdown code blocks."
+        },
+        {
+          "category": "tool_definitions",
+          "tokenCount": 207,
+          "estimatedTokenCount": false,
+          "content": "{\n  \"name\": \"execute_python\",\n  \"description\": \"Execute a Python code snippet and return stdout/stderr.\",\n  \"parameters\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"code\": { \"type\": \"string\", \"description\": \"Python code to execute\" }\n    },\n    \"required\": [\"code\"]\n  }\n}"
+        },
+        {
+          "category": "conversation_history",
+          "tokenCount": 410,
+          "estimatedTokenCount": false,
+          "content": "[User] How do I read a file in Python?\n[Assistant] Use the built-in `open()` function:\n```python\nwith open('file.txt', 'r') as f:\n    content = f.read()\n```\nThis automatically closes the file when the block exits.\n[User] What about reading line by line?\n[Assistant] Iterate over the file object:\n```python\nwith open('file.txt', 'r') as f:\n    for line in f:\n        print(line.strip())\n```\n[User] Can you help me write a function that reads a CSV and sums a numeric column?"
+        },
+        {
+          "category": "conversation_history",
+          "tokenCount": 129,
+          "estimatedTokenCount": false,
+          "content": "[Assistant] Sure! Let me write and test that function for you."
+        }
+      ]
+    },
+    {
+      "timestamp": "2024-01-01T10:00:04Z",
+      "totalTokens": 1221,
+      "items": [
+        {
+          "category": "system_prompt",
+          "tokenCount": 148,
+          "estimatedTokenCount": false,
+          "content": "You are a helpful coding assistant. Answer concisely and accurately. If you are unsure, say so. Format code examples with markdown code blocks."
+        },
+        {
+          "category": "tool_definitions",
+          "tokenCount": 207,
+          "estimatedTokenCount": false,
+          "content": "{\n  \"name\": \"execute_python\",\n  \"description\": \"Execute a Python code snippet and return stdout/stderr.\",\n  \"parameters\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"code\": { \"type\": \"string\", \"description\": \"Python code to execute\" }\n    },\n    \"required\": [\"code\"]\n  }\n}"
+        },
+        {
+          "category": "conversation_history",
+          "tokenCount": 539,
+          "estimatedTokenCount": false,
+          "content": "[User] How do I read a file in Python? ... [User] Can you help me write a function that reads a CSV and sums a numeric column?\n[Assistant] Sure! Let me write and test that for you.\n[Tool: execute_python] import csv\ndef sum_column(path, col):\n    total = 0\n    with open(path) as f:\n        for row in csv.DictReader(f):\n            total += float(row[col])\n    return total"
+        },
+        {
+          "category": "tool_outputs",
+          "tokenCount": 327,
+          "estimatedTokenCount": false,
+          "content": "stdout: Function defined successfully.\nColumn 'amount' sum: 4829.17\nAll 142 rows processed without error."
+        }
       ]
     }
   ]

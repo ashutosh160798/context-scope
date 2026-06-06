@@ -1,16 +1,115 @@
 {
   "version": "0.1",
   "scenario": "bloated_context",
+  "model": "gpt-4o",
+  "contextLimit": 128000,
   "frames": [
     {
-      "timestamp": "2024-01-01T00:00:00Z",
-      "totalTokens": 109000,
-      "contextLimit": 128000,
+      "timestamp": "2024-01-01T11:00:00Z",
+      "totalTokens": 2847,
       "items": [
-        {"category": "system_prompt", "tokenCount": 512, "estimatedTokenCount": false, "content": "[demo system prompt]"},
-        {"category": "conversation_history", "tokenCount": 45000, "estimatedTokenCount": false, "content": "[demo history with duplicates]"},
-        {"category": "tool_definitions", "tokenCount": 52000, "estimatedTokenCount": false, "content": "[bloated tool definitions]"},
-        {"category": "retrieved_context", "tokenCount": 11488, "estimatedTokenCount": false, "content": "[retrieved docs]"}
+        {
+          "category": "system_prompt",
+          "tokenCount": 2847,
+          "estimatedTokenCount": false,
+          "content": "You are an expert full-stack software engineer and technical lead with 20 years of experience. You specialize in distributed systems, cloud architecture, microservices, TypeScript, Python, Go, Rust, Java, C++, and many more technologies. Always provide production-quality code with comprehensive error handling, logging, and documentation. Format code with appropriate comments. Consider edge cases. Suggest optimizations. Mention trade-offs. Use best practices for the ecosystem in question. Never sacrifice correctness for brevity. Include unit tests where appropriate. Explain your reasoning step by step."
+        }
+      ]
+    },
+    {
+      "timestamp": "2024-01-01T11:00:02Z",
+      "totalTokens": 47291,
+      "items": [
+        {
+          "category": "system_prompt",
+          "tokenCount": 2847,
+          "estimatedTokenCount": false,
+          "content": "You are an expert full-stack software engineer... [2847 tokens]"
+        },
+        {
+          "category": "conversation_history",
+          "tokenCount": 14820,
+          "estimatedTokenCount": false,
+          "content": "[User turn 1-9: 14820 tokens of conversation including code, reviews, architecture discussion, and full stack trace pastes]"
+        },
+        {
+          "category": "conversation_history",
+          "tokenCount": 14820,
+          "estimatedTokenCount": false,
+          "content": "[DUPLICATE] Same conversation history block appended again due to context reconstruction bug. 14820 tokens duplicated."
+        },
+        {
+          "category": "retrieved_context",
+          "tokenCount": 14804,
+          "estimatedTokenCount": true,
+          "content": "Chunk 1: Full README (4800t) | Chunk 2: Full CHANGELOG (3200t) | Chunk 3: Full API reference (4100t) | Chunk 4: Stack Overflow thread (2704t)"
+        }
+      ]
+    },
+    {
+      "timestamp": "2024-01-01T11:00:04Z",
+      "totalTokens": 86139,
+      "items": [
+        {
+          "category": "system_prompt",
+          "tokenCount": 2847,
+          "estimatedTokenCount": false,
+          "content": "System prompt [2847 tokens]"
+        },
+        {
+          "category": "tool_definitions",
+          "tokenCount": 39052,
+          "estimatedTokenCount": false,
+          "content": "tool:search_codebase (2100t) | tool:run_tests (4800t) | tool:deploy_service (5200t) | tool:query_database with 47-table schema (12400t) | tool:call_external_api with OpenAPI spec inlined (14552t)"
+        },
+        {
+          "category": "conversation_history",
+          "tokenCount": 29640,
+          "estimatedTokenCount": false,
+          "content": "Conversation history × 2 duplicates [29640 tokens]"
+        },
+        {
+          "category": "retrieved_context",
+          "tokenCount": 14800,
+          "estimatedTokenCount": true,
+          "content": "Retrieved chunks 1-4 [14800 tokens]"
+        }
+      ]
+    },
+    {
+      "timestamp": "2024-01-01T11:00:07Z",
+      "totalTokens": 112843,
+      "items": [
+        {
+          "category": "system_prompt",
+          "tokenCount": 2847,
+          "estimatedTokenCount": false,
+          "content": "System prompt [2847 tokens]"
+        },
+        {
+          "category": "tool_definitions",
+          "tokenCount": 39052,
+          "estimatedTokenCount": false,
+          "content": "Tool definitions 1-5 [39052 tokens — 30.5% of context limit]"
+        },
+        {
+          "category": "conversation_history",
+          "tokenCount": 29640,
+          "estimatedTokenCount": false,
+          "content": "Conversation history × 2 duplicates [29640 tokens]"
+        },
+        {
+          "category": "retrieved_context",
+          "tokenCount": 29600,
+          "estimatedTokenCount": true,
+          "content": "Retrieved chunks × 2 (second RAG call returned same chunks — 29600 tokens duplicated)"
+        },
+        {
+          "category": "tool_outputs",
+          "tokenCount": 11704,
+          "estimatedTokenCount": false,
+          "content": "query_database: returned 847 rows as unformatted JSON — 11704 tokens (consider adding LIMIT or pagination)"
+        }
       ]
     }
   ]

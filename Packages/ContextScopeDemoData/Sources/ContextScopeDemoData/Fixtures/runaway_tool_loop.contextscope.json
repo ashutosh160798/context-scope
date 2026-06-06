@@ -1,23 +1,217 @@
 {
   "version": "0.1",
   "scenario": "runaway_tool_loop",
+  "model": "gpt-4o",
+  "contextLimit": 128000,
   "frames": [
     {
-      "timestamp": "2024-01-01T00:00:00Z",
-      "totalTokens": 2048,
-      "contextLimit": 128000,
+      "timestamp": "2024-01-01T12:00:00Z",
+      "totalTokens": 987,
       "items": [
-        {"category": "system_prompt", "tokenCount": 256, "estimatedTokenCount": false, "content": "[demo system prompt]"},
-        {"category": "tool_outputs", "tokenCount": 1792, "estimatedTokenCount": false, "content": "[first tool result]"}
+        {
+          "category": "system_prompt",
+          "tokenCount": 312,
+          "estimatedTokenCount": false,
+          "content": "You are an autonomous agent. Use the filesystem_tool to find and fix all failing tests in the project. Keep trying until all tests pass."
+        },
+        {
+          "category": "conversation_history",
+          "tokenCount": 675,
+          "estimatedTokenCount": false,
+          "content": "[User] Run the test suite and fix any failures automatically."
+        }
       ]
     },
     {
-      "timestamp": "2024-01-01T00:00:05Z",
-      "totalTokens": 8192,
-      "contextLimit": 128000,
+      "timestamp": "2024-01-01T12:00:03Z",
+      "totalTokens": 3841,
       "items": [
-        {"category": "system_prompt", "tokenCount": 256, "estimatedTokenCount": false, "content": "[demo system prompt]"},
-        {"category": "tool_outputs", "tokenCount": 7936, "estimatedTokenCount": false, "content": "[accumulated tool results]"}
+        {
+          "category": "system_prompt",
+          "tokenCount": 312,
+          "estimatedTokenCount": false,
+          "content": "You are an autonomous agent..."
+        },
+        {
+          "category": "tool_definitions",
+          "tokenCount": 892,
+          "estimatedTokenCount": false,
+          "content": "tool:filesystem_tool — read, write, list files | tool:run_shell — execute shell commands | tool:run_tests — run project tests"
+        },
+        {
+          "category": "conversation_history",
+          "tokenCount": 675,
+          "estimatedTokenCount": false,
+          "content": "[User] Run the test suite and fix any failures automatically."
+        },
+        {
+          "category": "tool_outputs",
+          "tokenCount": 1962,
+          "estimatedTokenCount": false,
+          "content": "[Tool call 1: run_tests]\nFAILED tests/test_auth.py::test_login — AssertionError: 401 != 200\nFAILED tests/test_auth.py::test_refresh — ConnectionError\nFAILED tests/test_data.py::test_pagination — IndexError: list index out of range\nFAILED tests/test_data.py::test_filter — TypeError: unsupported operand\n(47 more failures...)"
+        }
+      ]
+    },
+    {
+      "timestamp": "2024-01-01T12:00:08Z",
+      "totalTokens": 9204,
+      "items": [
+        {
+          "category": "system_prompt",
+          "tokenCount": 312,
+          "estimatedTokenCount": false,
+          "content": "You are an autonomous agent..."
+        },
+        {
+          "category": "tool_definitions",
+          "tokenCount": 892,
+          "estimatedTokenCount": false,
+          "content": "tool:filesystem_tool | tool:run_shell | tool:run_tests"
+        },
+        {
+          "category": "conversation_history",
+          "tokenCount": 675,
+          "estimatedTokenCount": false,
+          "content": "[User] Run the test suite and fix any failures automatically."
+        },
+        {
+          "category": "tool_outputs",
+          "tokenCount": 1962,
+          "estimatedTokenCount": false,
+          "content": "[Tool call 1: run_tests] 51 failures..."
+        },
+        {
+          "category": "tool_outputs",
+          "tokenCount": 3241,
+          "estimatedTokenCount": false,
+          "content": "[Tool call 2: filesystem_tool read src/auth.py]\n# Full 300-line auth.py source code returned\nimport hashlib\nimport secrets\nfrom datetime import datetime, timedelta\n...[full file contents, 3241 tokens]"
+        },
+        {
+          "category": "tool_outputs",
+          "tokenCount": 2122,
+          "estimatedTokenCount": false,
+          "content": "[Tool call 3: filesystem_tool write src/auth.py]\nWrote modified auth.py. Changes: added token refresh logic.\n[Tool call 4: run_tests]\nFAILED tests/test_auth.py::test_login — still 401 (import error in modified file)\nFAILED ... (49 more failures, 2 new failures introduced)"
+        }
+      ]
+    },
+    {
+      "timestamp": "2024-01-01T12:00:18Z",
+      "totalTokens": 28917,
+      "items": [
+        {
+          "category": "system_prompt",
+          "tokenCount": 312,
+          "estimatedTokenCount": false,
+          "content": "You are an autonomous agent..."
+        },
+        {
+          "category": "tool_definitions",
+          "tokenCount": 892,
+          "estimatedTokenCount": false,
+          "content": "tool:filesystem_tool | tool:run_shell | tool:run_tests"
+        },
+        {
+          "category": "conversation_history",
+          "tokenCount": 675,
+          "estimatedTokenCount": false,
+          "content": "[User] Run the test suite and fix any failures..."
+        },
+        {
+          "category": "tool_outputs",
+          "tokenCount": 7325,
+          "estimatedTokenCount": false,
+          "content": "[Tool calls 1-4 output: 7325 tokens — growing tool result history]"
+        },
+        {
+          "category": "tool_outputs",
+          "tokenCount": 9841,
+          "estimatedTokenCount": false,
+          "content": "[Tool calls 5-9: read models.py (2100t), write models.py, run_tests 53 failures, read config.py (1800t), run_shell pip install — 9841 tokens]"
+        },
+        {
+          "category": "tool_outputs",
+          "tokenCount": 9872,
+          "estimatedTokenCount": false,
+          "content": "[Tool calls 10-14: read requirements.txt, write requirements.txt, run_shell pip install -r (output: 47 packages installed, 9872 tokens of pip output), run_tests 58 failures (more than before)]"
+        }
+      ]
+    },
+    {
+      "timestamp": "2024-01-01T12:00:41Z",
+      "totalTokens": 71283,
+      "items": [
+        {
+          "category": "system_prompt",
+          "tokenCount": 312,
+          "estimatedTokenCount": false,
+          "content": "You are an autonomous agent..."
+        },
+        {
+          "category": "tool_definitions",
+          "tokenCount": 892,
+          "estimatedTokenCount": false,
+          "content": "tool:filesystem_tool | tool:run_shell | tool:run_tests"
+        },
+        {
+          "category": "conversation_history",
+          "tokenCount": 675,
+          "estimatedTokenCount": false,
+          "content": "[User] Run the test suite and fix any failures..."
+        },
+        {
+          "category": "tool_outputs",
+          "tokenCount": 27038,
+          "estimatedTokenCount": false,
+          "content": "[Tool calls 1-14: accumulated outputs — 27038 tokens]"
+        },
+        {
+          "category": "tool_outputs",
+          "tokenCount": 18204,
+          "estimatedTokenCount": false,
+          "content": "[Tool calls 15-21: read/write 6 more files, run_tests (61 failures), run_shell git diff (large diff), run_shell git stash — 18204 tokens]"
+        },
+        {
+          "category": "tool_outputs",
+          "tokenCount": 24162,
+          "estimatedTokenCount": false,
+          "content": "[Tool calls 22-28: git stash pop (conflict), read conflict files (8100t), write resolved files, run_tests — 71 failures now — 24162 tokens. Context pressure: 55.7%]"
+        }
+      ]
+    },
+    {
+      "timestamp": "2024-01-01T12:01:14Z",
+      "totalTokens": 119847,
+      "items": [
+        {
+          "category": "system_prompt",
+          "tokenCount": 312,
+          "estimatedTokenCount": false,
+          "content": "You are an autonomous agent..."
+        },
+        {
+          "category": "tool_definitions",
+          "tokenCount": 892,
+          "estimatedTokenCount": false,
+          "content": "tool:filesystem_tool | tool:run_shell | tool:run_tests"
+        },
+        {
+          "category": "conversation_history",
+          "tokenCount": 675,
+          "estimatedTokenCount": false,
+          "content": "[User] Run the test suite and fix any failures..."
+        },
+        {
+          "category": "tool_outputs",
+          "tokenCount": 69404,
+          "estimatedTokenCount": false,
+          "content": "[Tool calls 1-28 accumulated: 69404 tokens of tool outputs, growing with each iteration]"
+        },
+        {
+          "category": "tool_outputs",
+          "tokenCount": 48564,
+          "estimatedTokenCount": false,
+          "content": "[Tool calls 29-47: continued attempts to fix tests, each run_tests invocation returning full output (4000+ tokens), git operations, file reads/writes — 48564 tokens. Context pressure: 93.6%. CONTEXT_WARNING: approaching limit.]"
+        }
       ]
     }
   ]

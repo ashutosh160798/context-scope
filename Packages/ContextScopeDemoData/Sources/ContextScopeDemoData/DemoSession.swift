@@ -17,10 +17,14 @@ public struct DemoScenario: Identifiable, Sendable {
 
 public struct DemoSession: Sendable {
     public let scenario: DemoScenario
+    public let model: String
+    public let contextLimit: Int?
     public let frames: [ContextSnapshot]
 
-    public init(scenario: DemoScenario, frames: [ContextSnapshot]) {
+    public init(scenario: DemoScenario, model: String, contextLimit: Int?, frames: [ContextSnapshot]) {
         self.scenario = scenario
+        self.model = model
+        self.contextLimit = contextLimit
         self.frames = frames
     }
 }
