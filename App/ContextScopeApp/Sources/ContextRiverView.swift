@@ -293,45 +293,28 @@ struct ContextItemRow: View {
 struct WarningBanners: View {
     let snapshot: ContextSnapshot
 
-    private var warnings: [String] {
-        var result: [String] = []
-        if let pct = snapshot.pressurePercent {
-            if pct >= 95 { result.append("CRITICAL: Context at \(String(format: "%.0f%%", pct)) capacity. Response may be truncated.") }
-            else if pct >= 85 { result.append("WARNING: Context at \(String(format: "%.0f%%", pct)) — nearing limit.") }
-            else if pct >= 70 { result.append("NOTICE: Context at \(String(format: "%.0f%%", pct)).") }
-        }
-        let total = snapshot.totalTokens
-        for item in snapshot.items {
-            if total > 0 && Double(item.tokenCount) / Double(total) > 0.25 {
-                let style = CategoryStyle.styles[item.category]?.label ?? item.category.rawValue
-                result.append("'\(style)' consumes \(String(format: "%.0f%%", Double(item.tokenCount) / Double(total) * 100)) of input — consider trimming.")
-            }
-        }
-        // Detect duplicates by category
-        var seen: Set<ContextCategory> = []
-        for item in snapshot.items {
-            if !seen.insert(item.category).inserted {
-                let label = CategoryStyle.styles[item.category]?.label ?? item.category.rawValue
-                if result.first(where: { $0.contains("duplicate") && $0.contains(label) }) == nil {
-                    result.append("Duplicate '\(label)' blocks detected — possible context reconstruction bug.")
-                }
-            }
-        }
-        return result
-    }
-
+    // Warning evaluation now lives in ContextScopeCore (`ContextSnapshot.warnings`)
+    // as pure, unit-tested logic; this view only maps severity to presentation.
     var body: some View {
-        ForEach(warnings, id: \.self) { warning in
+        ForEach(snapshot.warnings) { warning in
             HStack(spacing: 8) {
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundStyle(warning.hasPrefix("CRITICAL") ? .red : warning.hasPrefix("WARNING") ? .orange : .yellow)
-                Text(warning)
+                    .foregroundStyle(color(for: warning.severity))
+                Text(warning.message)
                     .font(.caption)
                 Spacer()
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
-            .background(RoundedRectangle(cornerRadius: 6).fill(Color.orange.opacity(0.1)))
+            .background(RoundedRectangle(cornerRadius: 6).fill(color(for: warning.severity).opacity(0.1)))
+        }
+    }
+
+    private func color(for severity: ContextWarning.Severity) -> Color {
+        switch severity {
+        case .critical: return .red
+        case .warning: return .orange
+        case .notice: return .yellow
         }
     }
 }

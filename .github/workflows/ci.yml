@@ -20,8 +20,12 @@ jobs:
       - name: Build
         run: swift build
 
+      # Run the whole suite. `swift test` from the root only runs the app's own
+      # test target — it does NOT run the path-dependency packages' tests. The
+      # script iterates every package so Core/Capture/Storage/Viz/DemoData are
+      # actually exercised in CI.
       - name: Test
-        run: swift test
+        run: bash Scripts/test.sh
 
       - name: Ad-hoc sign binary
         run: bash Scripts/sign.sh

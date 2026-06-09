@@ -7,6 +7,19 @@ public enum ContextCategory: String, Codable, CaseIterable, Sendable {
     case retrievedContext = "retrieved_context"
     case toolOutputs = "tool_outputs"
     case other = "other"
+
+    /// Human-readable label, usable in warnings and other non-UI contexts
+    /// without depending on the SwiftUI `CategoryStyle` palette.
+    public var displayName: String {
+        switch self {
+        case .systemPrompt: return "system prompt"
+        case .conversationHistory: return "conversation history"
+        case .toolDefinitions: return "tool definitions"
+        case .retrievedContext: return "retrieved context"
+        case .toolOutputs: return "tool output"
+        case .other: return "other content"
+        }
+    }
 }
 
 public struct ContextItem: Identifiable, Codable, Sendable {
