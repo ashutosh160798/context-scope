@@ -21,4 +21,22 @@ public struct Sanitizer: Sendable {
         }
         return result
     }
+
+    /// Redact common API-key patterns from free-form text before export.
+    /// Covers Bearer tokens, OpenAI-style keys (sk-…), and explicit
+    /// `api_key: …` / `"api_key": "…"` patterns in JSON.
+    public func sanitize(content: String) -> String {
+        var result = content
+        let patterns: [(String, String)] = [
+            (#"Bearer\s+[A-Za-z0-9._-]{20,}"#, "Bearer [REDACTED]"),
+            (#"sk-[A-Za-z0-9-]{10,}"#, "[REDACTED]"),
+            (#"(?i)(\"?api[_-]?key\"?\s*[:=]\s*\"?)[A-Za-z0-9._-]{16,}"#, "$1[REDACTED]"),
+        ]
+        for (pattern, replacement) in patterns {
+            guard let regex = try? NSRegularExpression(pattern: pattern) else { continue }
+            let range = NSRange(result.startIndex..., in: result)
+            result = regex.stringByReplacingMatches(in: result, range: range, withTemplate: replacement)
+        }
+        return result
+    }
 }

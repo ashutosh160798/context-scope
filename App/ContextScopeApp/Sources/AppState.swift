@@ -38,9 +38,28 @@ final class AppState: ObservableObject {
     private var proxy: ProxyServer?
     private let keychain = KeychainStore()
 
+    // MARK: - Persistence
+    private var db: Database?
+    private var sessionRepo: SessionRepository?
+    private var runRepo: RunRepository?
+    private var currentSession: Session?
+    private let projectID: UUID = {
+        let key = "com.contextscope.projectID"
+        if let s = UserDefaults.standard.string(forKey: key), let id = UUID(uuidString: s) { return id }
+        let id = UUID()
+        UserDefaults.standard.set(id.uuidString, forKey: key)
+        return id
+    }()
+
+    private static func storageURL() -> URL {
+        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        return base.appendingPathComponent("ContextScope", isDirectory: true)
+    }
+
     init() {
         showOnboarding = !UserDefaults.standard.bool(forKey: "hasLaunchedBefore")
         migrateAPIKeyIfNeeded()
+        Task { await self.setupStorage() }
     }
 
     // One-time migration: move plaintext API key from UserDefaults into Keychain
@@ -49,6 +68,21 @@ final class AppState: ObservableObject {
         if let legacy = ud.string(forKey: "apiKey"), !legacy.isEmpty {
             keychain.write(legacy)
             ud.removeObject(forKey: "apiKey")
+        }
+    }
+
+    private func setupStorage() async {
+        let database = Database(url: Self.storageURL())
+        do {
+            try await database.open()
+            try await database.migrate()
+            db = database
+            sessionRepo = SessionRepository(database: database)
+            runRepo = RunRepository(database: database)
+            let stored = (try? await sessionRepo!.fetchSessions(for: projectID)) ?? []
+            liveSessions = stored.sorted { $0.startedAt > $1.startedAt }
+        } catch {
+            // Non-fatal: the app works without persistence, just loses data on quit.
         }
     }
 
@@ -93,9 +127,42 @@ final class AppState: ObservableObject {
             try await server.start()
             proxyRunning = true
             proxyError = nil
+
+            // Start a new session for this proxy run
+            let session = Session(projectID: projectID)
+            currentSession = session
+            if let repo = sessionRepo {
+                try? await repo.save(session)
+                liveSessions.insert(session, at: 0)
+            }
+
             let coordinator = LiveCaptureCoordinator()
             captureCoordinator = coordinator
+
+            // Save each completed run to the repository
+            coordinator.onRunComplete = { [weak self] snapshot, model, inputItems in
+                guard let self, let runRepo = self.runRepo, let session = self.currentSession else { return }
+                Task {
+                    let outputItem = snapshot.items.last { $0.category == .toolOutputs }
+                    let outputTokens = outputItem?.tokenCount ?? 0
+                    let inputTokens = max(0, snapshot.totalTokens - outputTokens)
+                    let isEstimated = inputItems.isEmpty || inputItems.allSatisfy { $0.estimatedTokenCount }
+                    let run = Run(
+                        id: snapshot.runID,
+                        sessionID: session.id,
+                        model: model,
+                        requestedAt: snapshot.timestamp,
+                        contextItems: inputItems,
+                        totalInputTokens: inputTokens,
+                        totalOutputTokens: outputTokens,
+                        inputTokensEstimated: isEstimated
+                    )
+                    try? await runRepo.save(run)
+                }
+            }
+
             coordinator.start(events: server.events)
+
             // Forward coordinator's published values to AppState
             Task { [weak self, weak coordinator] in
                 guard let self, let coordinator else { return }
@@ -120,6 +187,19 @@ final class AppState: ObservableObject {
         captureCoordinator = nil
         liveSnapshot = nil
         liveTokenCount = 0
+
+        // Mark session as ended
+        if var session = currentSession {
+            session.endedAt = Date()
+            currentSession = nil
+            if let repo = sessionRepo {
+                try? await repo.save(session)
+                if let idx = liveSessions.firstIndex(where: { $0.id == session.id }) {
+                    liveSessions[idx] = session
+                }
+            }
+        }
+
         await proxy?.stop()
         proxy = nil
         proxyRunning = false

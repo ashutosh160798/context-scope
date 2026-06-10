@@ -121,7 +121,7 @@ public actor ProxyServer {
                 (try? JSONSerialization.jsonObject(with: $0) as? [String: Any])
             }?["stream"] as? Bool ?? false
 
-            eventContinuation.yield(TraceEvent(runID: runID, kind: .requestStart, payload: Data()))
+            eventContinuation.yield(TraceEvent(runID: runID, kind: .requestStart, payload: parsed.body ?? Data()))
 
             let forwarder = UpstreamForwarder()
 
