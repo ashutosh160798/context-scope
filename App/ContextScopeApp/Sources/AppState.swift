@@ -125,6 +125,29 @@ final class AppState: ObservableObject {
         proxyRunning = false
     }
 
+    // MARK: - Trace import
+
+    /// Load a `.contextscope.json` export file and replay it in the main workspace.
+    func importTrace(from url: URL) {
+        do {
+            let data = try Data(contentsOf: url)
+            let (run, _) = try TraceExporter().import(from: data)
+            let snapshot = ContextSnapshot(
+                runID: run.id,
+                items: run.contextItems,
+                totalTokens: run.totalInputTokens,
+                contextLimit: nil
+            )
+            replayEngine = ReplayEngine(frames: [snapshot])
+            replayEngine.seek(to: 0)
+            activeTab = .contextRiver
+            showOnboarding = false
+            proxyError = nil
+        } catch {
+            proxyError = "Import failed: \(error.localizedDescription)"
+        }
+    }
+
     // MARK: - Onboarding
 
     func completeOnboarding() {

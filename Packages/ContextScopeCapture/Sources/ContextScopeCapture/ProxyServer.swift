@@ -126,18 +126,18 @@ public actor ProxyServer {
             let forwarder = UpstreamForwarder()
 
             if isStreaming {
-                var responseHeadersSent = false
-                var allChunks = Data()
+                let responseHeadersSent = Box(false)
+                let allChunks = Box(Data())
 
                 let finalResponse = try await forwarder.forwardStreaming(
                     request: request,
                     to: upstreamBaseURL
                 ) { chunk in
-                    allChunks.append(chunk)
-                    if !responseHeadersSent {
+                    allChunks.value.append(chunk)
+                    if !responseHeadersSent.value {
                         let header = "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nCache-Control: no-cache\r\nTransfer-Encoding: chunked\r\nConnection: keep-alive\r\n\r\n"
                         await send(Data(header.utf8), to: connection)
-                        responseHeadersSent = true
+                        responseHeadersSent.value = true
                     }
                     // Send chunk in HTTP chunked encoding format
                     let hexLen = String(chunk.count, radix: 16)
@@ -247,6 +247,14 @@ public actor ProxyServer {
         default: return "Unknown"
         }
     }
+}
+
+// Reference-type wrapper used to carry mutable state across @Sendable closures
+// without unsafe escapes. The mutations are safe because the closure is called
+// sequentially by the `for try await` loop in `forwardStreaming`.
+private final class Box<T>: @unchecked Sendable {
+    var value: T
+    init(_ value: T) { self.value = value }
 }
 
 public enum ProxyError: Error, LocalizedError {

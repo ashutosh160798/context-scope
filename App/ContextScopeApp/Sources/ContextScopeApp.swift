@@ -1,5 +1,7 @@
 import SwiftUI
+import AppKit
 import ContextScopeCore
+import ContextScopeStorage
 import ContextScopeDemoData
 
 @main
@@ -16,6 +18,18 @@ struct ContextScopeApp: App {
         .windowToolbarStyle(.unified)
         .commands {
             CommandGroup(replacing: .newItem) { }
+            CommandGroup(after: .saveItem) {
+                Button("Import Trace…") {
+                    let panel = NSOpenPanel()
+                    panel.allowedContentTypes = [.init(filenameExtension: "contextscope.json") ?? .json]
+                    panel.allowsMultipleSelection = false
+                    panel.canChooseDirectories = false
+                    if panel.runModal() == .OK, let url = panel.url {
+                        appState.importTrace(from: url)
+                    }
+                }
+                .keyboardShortcut("i", modifiers: [.command, .shift])
+            }
             CommandMenu("Proxy") {
                 Button(appState.proxyRunning ? "Stop Proxy" : "Start Proxy") {
                     Task { await appState.toggleProxy() }
