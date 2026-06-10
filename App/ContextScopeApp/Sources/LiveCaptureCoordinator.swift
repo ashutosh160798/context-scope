@@ -13,6 +13,9 @@ final class LiveCaptureCoordinator: ObservableObject {
     /// Parameters: final snapshot, model name, input-only context items.
     var onRunComplete: ((ContextSnapshot, String, [ContextItem]) -> Void)?
 
+    /// Called with the round-trip latency (seconds) when a run completes.
+    var onLatencyMeasured: ((TimeInterval) -> Void)?
+
     private var consumeTask: Task<Void, Never>?
     private let adapter = OpenAIAdapter()
     private let registry = ModelRegistry()
@@ -22,6 +25,7 @@ final class LiveCaptureCoordinator: ObservableObject {
             var builder: LiveSnapshotBuilder?
             var currentModel = "unknown"
             var inputItems: [ContextItem] = []
+            var requestStartTime: Date?
 
             for await event in events {
                 guard let self else { break }
@@ -30,6 +34,7 @@ final class LiveCaptureCoordinator: ObservableObject {
                     let parsed = self.parseRequest(from: event.payload)
                     currentModel = parsed.model
                     inputItems = parsed.items
+                    requestStartTime = event.timestamp
                     var b = LiveSnapshotBuilder(runID: event.runID, contextLimit: parsed.limit)
                     b.seed(items: parsed.items)
                     builder = b
@@ -44,10 +49,14 @@ final class LiveCaptureCoordinator: ObservableObject {
                         self.liveSnapshot = snap
                         self.liveTokenCount = snap.totalTokens
                         self.onRunComplete?(snap, currentModel, inputItems)
+                        if let start = requestStartTime {
+                            self.onLatencyMeasured?(event.timestamp.timeIntervalSince(start))
+                        }
                     }
                     builder = nil
                     currentModel = "unknown"
                     inputItems = []
+                    requestStartTime = nil
 
                 default:
                     if builder?.runID == event.runID {

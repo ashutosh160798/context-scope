@@ -26,6 +26,8 @@ final class AppState: ObservableObject {
     // MARK: - Live capture
     @Published var liveSnapshot: ContextSnapshot?
     @Published var liveTokenCount: Int = 0
+    @Published var lastLatencyMs: Double?
+    @Published private(set) var lastCompletedRun: Run?
     private var captureCoordinator: LiveCaptureCoordinator?
 
     // MARK: - Real sessions (live proxy captures)
@@ -139,26 +141,31 @@ final class AppState: ObservableObject {
             let coordinator = LiveCaptureCoordinator()
             captureCoordinator = coordinator
 
-            // Save each completed run to the repository
+            // Save each completed run and cache it for export
             coordinator.onRunComplete = { [weak self] snapshot, model, inputItems in
-                guard let self, let runRepo = self.runRepo, let session = self.currentSession else { return }
-                Task {
-                    let outputItem = snapshot.items.last { $0.category == .toolOutputs }
-                    let outputTokens = outputItem?.tokenCount ?? 0
-                    let inputTokens = max(0, snapshot.totalTokens - outputTokens)
-                    let isEstimated = inputItems.isEmpty || inputItems.allSatisfy { $0.estimatedTokenCount }
-                    let run = Run(
-                        id: snapshot.runID,
-                        sessionID: session.id,
-                        model: model,
-                        requestedAt: snapshot.timestamp,
-                        contextItems: inputItems,
-                        totalInputTokens: inputTokens,
-                        totalOutputTokens: outputTokens,
-                        inputTokensEstimated: isEstimated
-                    )
-                    try? await runRepo.save(run)
+                guard let self else { return }
+                let outputItem = snapshot.items.last { $0.category == .toolOutputs }
+                let outputTokens = outputItem?.tokenCount ?? 0
+                let inputTokens = max(0, snapshot.totalTokens - outputTokens)
+                let isEstimated = inputItems.isEmpty || inputItems.allSatisfy { $0.estimatedTokenCount }
+                let run = Run(
+                    id: snapshot.runID,
+                    sessionID: self.currentSession?.id ?? UUID(),
+                    model: model,
+                    requestedAt: snapshot.timestamp,
+                    contextItems: inputItems,
+                    totalInputTokens: inputTokens,
+                    totalOutputTokens: outputTokens,
+                    inputTokensEstimated: isEstimated
+                )
+                self.lastCompletedRun = run
+                if let runRepo = self.runRepo {
+                    Task { try? await runRepo.save(run) }
                 }
+            }
+
+            coordinator.onLatencyMeasured = { [weak self] latency in
+                self?.lastLatencyMs = latency * 1_000
             }
 
             coordinator.start(events: server.events)
@@ -187,6 +194,7 @@ final class AppState: ObservableObject {
         captureCoordinator = nil
         liveSnapshot = nil
         liveTokenCount = 0
+        lastLatencyMs = nil
 
         // Mark session as ended
         if var session = currentSession {
@@ -226,6 +234,29 @@ final class AppState: ObservableObject {
         } catch {
             proxyError = "Import failed: \(error.localizedDescription)"
         }
+    }
+
+    /// Build export data for the most recent completed run, or the current
+    /// snapshot if no run has completed yet (e.g. demo mode). Returns nil
+    /// when there is nothing to export.
+    func exportCurrentTrace() -> Data? {
+        let run: Run
+        if let completed = lastCompletedRun {
+            run = completed
+        } else if let snapshot = liveSnapshot ?? replayEngine.currentSnapshot {
+            run = Run(
+                id: snapshot.runID,
+                sessionID: currentSession?.id ?? UUID(),
+                model: "unknown",
+                requestedAt: snapshot.timestamp,
+                contextItems: snapshot.items,
+                totalInputTokens: snapshot.totalTokens,
+                inputTokensEstimated: true
+            )
+        } else {
+            return nil
+        }
+        return try? TraceExporter().export(run: run, events: [])
     }
 
     // MARK: - Onboarding

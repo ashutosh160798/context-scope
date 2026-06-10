@@ -25,15 +25,25 @@ struct MenuBarView: View {
 
             Divider()
 
-            // Live token count (visible when proxy is running)
+            // Last request stats (visible when proxy is running and a request has completed)
             if appState.proxyRunning, appState.liveTokenCount > 0 {
                 HStack {
-                    Text("Last request")
+                    Text("Context")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Spacer()
                     Text("\(appState.liveTokenCount) tokens")
                         .font(.caption.monospacedDigit().bold())
+                }
+                if let ms = appState.lastLatencyMs {
+                    HStack {
+                        Text("Latency")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text(String(format: "%.0f ms", ms))
+                            .font(.caption.monospacedDigit().bold())
+                    }
                 }
                 Divider()
             }

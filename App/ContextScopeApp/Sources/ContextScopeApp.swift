@@ -29,6 +29,18 @@ struct ContextScopeApp: App {
                     }
                 }
                 .keyboardShortcut("i", modifiers: [.command, .shift])
+
+                Button("Export Trace…") {
+                    guard let data = appState.exportCurrentTrace() else { return }
+                    let panel = NSSavePanel()
+                    panel.allowedContentTypes = [.init(filenameExtension: "contextscope.json") ?? .json]
+                    panel.nameFieldStringValue = "trace.contextscope.json"
+                    panel.canCreateDirectories = true
+                    if panel.runModal() == .OK, let url = panel.url {
+                        try? data.write(to: url)
+                    }
+                }
+                .keyboardShortcut("e", modifiers: [.command, .shift])
             }
             CommandMenu("Proxy") {
                 Button(appState.proxyRunning ? "Stop Proxy" : "Start Proxy") {
